@@ -1,10 +1,10 @@
 require('dotenv').config()
 const {SECRET} = process.env
-const {USER} = require('../models/user')
+const {User} = require('../models/user')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const createToken = (user, id) => {
+const createToken = (username, id) => {
     return jwt.sign(
         {
             username,
@@ -22,7 +22,7 @@ module.exports = {
     register: async (req, res) => {
         try {
             const {username, password} = req.body
-            let foundUser = await USER.findOne({where: {username}})
+            let foundUser = await User.findOne({where: {username}})
             if (foundUser) {
                 res.status(400).send('Username already exists')
         } else {
@@ -30,7 +30,7 @@ module.exports = {
             const hash = bcrypt.hashSync(password, salt)
             const newUser = await User.create({username, hashedPass: hash})
             const token = createToken(newUser.dataValues.username, newUser.dataValues.id)
-            console.log('token', token
+            console.log('token', token)
             const exp = Date.now() + 1000 * 60 * 60 * 48
             res.status(200).send({
                 username: newUser.dataValues.username,
@@ -38,7 +38,7 @@ module.exports = {
                 token,
                 exp})
         }
-    } catch (err) {
+    } catch (error) {
         console.log('Error In Register')
         console.log(error)
         res.sendStatus(400)
