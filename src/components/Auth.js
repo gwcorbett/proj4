@@ -1,6 +1,6 @@
 import {useState, useContext} from 'react'
 import axios from 'axios'
-import {AuthContext} from '../store/authContext.js'
+import {AuthContextProvider} from '../store/authContext.js'
 
 
 
@@ -12,7 +12,7 @@ const Auth = () => {
    const [message, setMessage] = useState('')
    const [display, setDisplay] = useState('none')
 
-   const authCtx = useContext(AuthContext)
+   const authCtx = useContext(AuthContextProvider)
  
    const submitHandler = e => {
        e.preventDefault()

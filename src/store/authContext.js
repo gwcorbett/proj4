@@ -2,16 +2,6 @@ import { useState, useEffect, useCallback, createContext } from 'react'
 
 let logoutTimer
 
-const login = (token, exp, userID) => {
-  setToken(token)
-  setUserId(userID)
-  localStorage.setItem('token', token)
-  localStorage.setItem('exp', exp)
-  const remainingTime = calculateRemainingTime(exp)
-  logoutTimer = setTimeout(logout, remainingTime)
-}
-
-
 const AuthContext = createContext({
   token: '',
   login: () => {},
@@ -29,12 +19,14 @@ const calculateRemainingTime = (exp) => {
 const getLocalData = () => {
   const storedToken = localStorage.getItem('token')
   const storedExp = localStorage.getItem('exp')
+  const storedId = localStorage.getItem('userId')
 
   const remainingTime = calculateRemainingTime(storedExp)
 
   if (remainingTime <= 1000 * 60 * 30) {
     localStorage.removeItem('token')
     localStorage.removeItem('exp')
+    localStorage.removeItem('userId')
     return null
   }
 
@@ -42,6 +34,7 @@ const getLocalData = () => {
   return {
     token: storedToken,
     duration: remainingTime,
+    userId: storedId
   }
 }
 
@@ -51,8 +44,10 @@ export const AuthContextProvider = (props) => {
   const localData = getLocalData()
   
   let initialToken
+  let initialId
   if (localData) {
     initialToken = localData.token
+    initialId = localData.userId
   }
 
   const [token, setToken] = useState(initialToken)
@@ -71,13 +66,27 @@ export const AuthContextProvider = (props) => {
     }
   }, [])
 
-  const login = () => {}
+  const login = (token, exp, userID) => {
+    setToken(token)
+    setUserId(userID)
+    localStorage.setItem('token', token)
+    localStorage.setItem('exp', exp)
+    localStorage.setItem('userId', userId)
+    const remainingTime = calculateRemainingTime(exp)
+    logoutTimer = setTimeout(logout, remainingTime)
+  }
+
+  useEffect(() => {
+    if (localData) {
+      logoutTimer = setTimeout(logout, localData.duration)
+    }
+  }, [localData, logout])
 
   const contextValue = {
-    token,
-    login,
-    logout, 
-    userId
+    token: token,
+    login: login,
+    logout: logout,
+    userId: userId
   }
 
   return (
