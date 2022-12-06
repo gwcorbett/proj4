@@ -9,6 +9,8 @@ const Auth = () => {
    const [username, setUsername] = useState('')
    const [password, setPassword] = useState('')
    const [register, setRegister] = useState(true)
+   const [message, setMessage] = useState('')
+   const [display, setDisplay] = useState('none')
 
    const authCtx = useContext(AuthContext)
  
@@ -22,9 +24,11 @@ const Auth = () => {
        const url= 'https://socialmtn.devmountain.com'
 
        axios.post(register ? `${url}/register` : `${url}/login`, body)
-            .then(({data}) => {console.log('AFTER AUTH',data)
+            .then((res) => {console.log('AFTER AUTH',res.data)
                 authCtx.login(res.data.token, res.data.exp, res.data.userId)})
             .catch(err => {
+                setMessage(err.response.data)
+                setDisplay('block')
                 setPassword('')
                 setUsername('')
             })
@@ -52,6 +56,7 @@ const Auth = () => {
                    {register ? 'Sign Up' : 'Login'}
                </button>
            </form>
+           <p style={{display: display}} className='auth-msg'>{message}</p>
            <button className='form-btn' onClick={() => setRegister(!register)}>
             Need to {register ? 'Login' : 'Sign Up'}?</button>
        </main>
